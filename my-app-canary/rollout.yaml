@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: my-app-canary
-        image: jakuboskera/blue-green:green
+        image: jakuboskera/success-rate:100
         ports:
         - name: http
           containerPort: 8080
