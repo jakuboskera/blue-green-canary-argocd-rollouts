@@ -2,16 +2,16 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: argo-cd
-  namespace: argo-cd
+  namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://github.com/jakuboskera/argocd.git'
-    path: argo-cd
+    path: argocd
     targetRevision: HEAD
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: argo-cd
+    namespace: argocd
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
