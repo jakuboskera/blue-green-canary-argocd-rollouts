@@ -7,7 +7,7 @@ metadata:
   namespace: my-app-bluegreen
 spec:
   rules:
-  - host: my-app-blugreen.local
+  - host: my-app-bluegreen.local
     http:
       paths:
       - backend:
