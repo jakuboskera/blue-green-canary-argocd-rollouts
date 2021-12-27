@@ -30,7 +30,7 @@ spec:
         image: jakuboskera/success-rate:100
         ports:
         - name: http
-          containerPort: 8080
+          containerPort: 5050
           protocol: TCP
         resources:
           requests:
