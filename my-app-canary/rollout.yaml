@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: my-app-canary
-        image: jakuboskera/success-rate:100
+        image: jakuboskera/success-rate:66
         ports:
         - name: http
           containerPort: 5000
