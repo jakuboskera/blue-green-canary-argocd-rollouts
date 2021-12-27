@@ -5,14 +5,14 @@ metadata:
   namespace: argocd
 spec:
   project: default
-source:
-  repoURL: 'https://github.com/jakuboskera/argocd.git'
-  path: argo-rollouts
-  targetRevision: HEAD
-destination:
-  server: 'https://kubernetes.default.svc'
-  namespace: argo-rollouts
-syncPolicy:
-  syncOptions:
-    - CreateNamespace=true
+  source:
+    repoURL: 'https://github.com/jakuboskera/argocd.git'
+    path: argo-rollouts
+    targetRevision: HEAD
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: argo-rollouts
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
 
