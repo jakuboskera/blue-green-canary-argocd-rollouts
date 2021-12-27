@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: my-app
+  name: my-app-canary
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://github.com/jakuboskera/argocd.git'
-    path: my-app
+    path: my-app-canary
     targetRevision: HEAD
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: my-app
+    namespace: my-app-canary
   syncPolicy:
     syncOptions:
       - CreateNamespace=true

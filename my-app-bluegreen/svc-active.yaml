@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-app
-  namespace: my-app
+  name: my-app-bluegreen-active
+  namespace: my-app-bluegreen
 spec:
   type: ClusterIP
   ports:
@@ -11,4 +11,4 @@ spec:
     protocol: TCP
     name: http
   selector:
-    app: my-app
+    app: my-app-bluegreen

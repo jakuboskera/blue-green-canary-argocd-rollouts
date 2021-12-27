@@ -2,16 +2,17 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   labels:
-    app: my-app
-  name: my-app
-  namespace: my-app
+    app: my-app-canary
+  name: my-app-canary
+  namespace: my-app-canary
 spec:
   rules:
-  - http:
+  - host: my-app-canary.local
+    http:
       paths:
       - backend:
           service:
-            name: my-app
+            name: my-app-canary
             port:
               name: http
         pathType: ImplementationSpecific

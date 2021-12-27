@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app: my-app-bluegreen
+  name: my-app-bluegreen
+  namespace: my-app-bluegreen
+spec:
+  rules:
+  - host: my-app-blugreen.local
+    http:
+      paths:
+      - backend:
+          service:
+            name: my-app-bluegreen
+            port:
+              name: http
+        pathType: ImplementationSpecific
+

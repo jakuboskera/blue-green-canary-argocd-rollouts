@@ -1,8 +1,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: my-app
-  namespace: my-app
+  name: my-app-bluegreen
+  namespace: my-app-bluegreen
 spec:
   replicas: 5
   strategy:
@@ -19,14 +19,14 @@ spec:
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: my-app
+      app: my-app-bluegreen
   template:
     metadata:
       labels:
-        app: my-app
+        app: my-app-bluegreen
     spec:
       containers:
-      - name: my-app
+      - name: my-app-bluegreen
         image: jakuboskera/blue-green:blue
         ports:
         - name: http
