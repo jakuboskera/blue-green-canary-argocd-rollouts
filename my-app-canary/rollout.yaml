@@ -13,7 +13,8 @@ spec:
       canaryService: my-app-canary-canary
       steps:
       - setWeight: 50
-      - pause: {duration: 1m}
+      # - pause: {duration: 1m}
+      - pause: {}
       - analysis:
           templates:
           - templateName: success-rate
