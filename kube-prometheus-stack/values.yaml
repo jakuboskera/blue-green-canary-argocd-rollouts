@@ -5,6 +5,8 @@ prometheus:
     podMonitorSelectorNilUsesHelmValues: false
   ingress:
     enabled: true
+    hosts:
+    - prometheus-local
 
 grafana:
   enabled: false
