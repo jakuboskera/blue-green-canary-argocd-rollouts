@@ -1,6 +1,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
+  labels:
+    app: my-app-canary
   name: my-app-canary
   namespace: my-app-canary
 spec:
