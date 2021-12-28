@@ -1,0 +1,17 @@
+prometheus:
+  prometheusSpec:
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+
+  grafana:
+    enabled: false
+
+  alertmanager:
+    enabled: false
+
+  defaultRules:
+    create: false
+
+# prometheus-node-exporter:
+#   hostRootFsMount: false
