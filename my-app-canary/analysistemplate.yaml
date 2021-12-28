@@ -13,7 +13,7 @@ spec:
     interval: 60s
     count: 3
     successCondition: result[0] >= 0.95
-    failureLimit: 3
+    failureLimit: 1
     provider:
       prometheus:
         address: "http://kube-prometheus-stack-prometheus.kube-prometheus-stack.svc.cluster.local:9090"
