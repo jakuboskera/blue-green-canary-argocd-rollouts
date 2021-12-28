@@ -3,10 +3,6 @@ prometheus:
     ruleSelectorNilUsesHelmValues: false
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
-  ingress:
-    enabled: true
-    hosts:
-    - prometheus.local
 
 grafana:
   enabled: false
