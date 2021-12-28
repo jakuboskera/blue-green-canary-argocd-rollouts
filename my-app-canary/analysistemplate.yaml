@@ -10,7 +10,7 @@ spec:
   - name: service-name
   metrics:
   - name: success-rate
-    interval: 60s
+    interval: 30s
     count: 3
     successCondition: result[0] >= 0.95
     failureLimit: 1
@@ -19,8 +19,8 @@ spec:
         address: "http://kube-prometheus-stack-prometheus.kube-prometheus-stack.svc.cluster.local:9090"
         query: |
           sum(irate(
-            flask_http_request_total{service="my-app-canary", status!~"4.*"}[30s]
+            flask_http_request_total{service="my-app-canary-canary", status!~"4.*"}[30s]
             )) /
           sum(irate(
-          flask_http_request_total{service="my-app-canary"}[30s]
+          flask_http_request_total{service="my-app-canary-canary"}[30s]
           ))

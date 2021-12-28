@@ -9,9 +9,11 @@ spec:
   replicas: 2
   strategy:
     canary:
+      stableService: my-app-canary-stable
+      canaryService: my-app-canary-canary
       steps:
       - setWeight: 50
-      - pause: {duration: 2m}
+      - pause: {duration: 1m}
       - analysis:
           templates:
           - templateName: success-rate
