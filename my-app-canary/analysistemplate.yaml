@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+  labels:
+    app: my-app-canary
+  namespace: my-app-canary
+spec:
+  args:
+  - name: service-name
+  metrics:
+  - name: success-rate
+    successCondition: result[0] >= 0.95
+    provider:
+      prometheus:
+        address: "http://kube-prometheus-stack-prometheus.kube-prometheus-stack.svc.cluster.local:9090"
+        query: |
+          sum(irate(
+            flask_http_request_total{service="my-app-canary", status!~"4.*"}[15s]
+            )) /
+          sum(irate(
+          flask_http_request_total{service="my-app-canary"}[15s]
+          ))

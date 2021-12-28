@@ -11,7 +11,13 @@ spec:
     canary:
       steps:
       - setWeight: 50
-      - pause: {}
+      - pause: {duration: 30s}
+      - analysis:
+          templates:
+          - templateName: success-rate
+          args:
+          - name: service-name
+            value: my-app-canary
   revisionHistoryLimit: 2
   selector:
     matchLabels:
@@ -23,7 +29,7 @@ spec:
     spec:
       containers:
       - name: my-app-canary
-        image: jakuboskera/success-rate:100
+        image: jakuboskera/success-rate:66
         ports:
         - name: http
           containerPort: 5000
