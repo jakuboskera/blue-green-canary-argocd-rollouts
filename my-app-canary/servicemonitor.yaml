@@ -2,9 +2,9 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: my-app-canary
+  namespace: my-app-canary
   labels:
     app: my-app-canary
-  namespace: my-app-canary
 spec:
   selector:
     matchLabels:

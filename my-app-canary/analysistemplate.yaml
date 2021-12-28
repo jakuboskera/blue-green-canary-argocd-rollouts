@@ -2,9 +2,9 @@ apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
   name: success-rate
+  namespace: my-app-canary
   labels:
     app: my-app-canary
-  namespace: my-app-canary
 spec:
   args:
   - name: service-name
