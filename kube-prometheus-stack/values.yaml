@@ -6,7 +6,7 @@ prometheus:
   ingress:
     enabled: true
     hosts:
-    - prometheus-local
+    - prometheus.local
 
 grafana:
   enabled: false
