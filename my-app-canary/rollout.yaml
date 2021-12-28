@@ -4,18 +4,12 @@ metadata:
   name: my-app-canary
   namespace: my-app-canary
 spec:
-  replicas: 5
+  replicas: 2
   strategy:
     canary:
       steps:
-      - setWeight: 20
+      - setWeight: 50
       - pause: {}
-      - setWeight: 40
-      - pause: {duration: 10}
-      - setWeight: 60
-      - pause: {duration: 10}
-      - setWeight: 80
-      - pause: {duration: 10}
   revisionHistoryLimit: 2
   selector:
     matchLabels:

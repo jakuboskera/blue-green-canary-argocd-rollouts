@@ -4,7 +4,7 @@ metadata:
   name: my-app-bluegreen
   namespace: my-app-bluegreen
 spec:
-  replicas: 5
+  replicas: 1
   strategy:
     blueGreen:
       activeService: my-app-bluegreen-active
