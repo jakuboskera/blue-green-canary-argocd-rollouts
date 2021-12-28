@@ -19,7 +19,7 @@ spec:
           - templateName: success-rate
           args:
           - name: service-name
-            value: my-app-canary
+            value: my-app-canary-canary
   revisionHistoryLimit: 2
   selector:
     matchLabels:
