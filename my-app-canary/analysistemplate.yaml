@@ -19,8 +19,8 @@ spec:
         address: "http://kube-prometheus-stack-prometheus.kube-prometheus-stack.svc.cluster.local:9090"
         query: |
           sum(irate(
-            flask_http_request_total{service="my-app-canary", status!~"4.*"}[15s]
+            flask_http_request_total{service="my-app-canary", status!~"4.*"}[30s]
             )) /
           sum(irate(
-          flask_http_request_total{service="my-app-canary"}[15s]
+          flask_http_request_total{service="my-app-canary"}[30s]
           ))

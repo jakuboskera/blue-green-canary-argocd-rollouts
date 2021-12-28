@@ -11,7 +11,7 @@ spec:
     canary:
       steps:
       - setWeight: 50
-      - pause: {duration: 30s}
+      - pause: {duration: 2m}
       - analysis:
           templates:
           - templateName: success-rate
