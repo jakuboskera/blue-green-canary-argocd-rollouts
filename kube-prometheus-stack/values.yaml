@@ -3,6 +3,8 @@ prometheus:
     ruleSelectorNilUsesHelmValues: false
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
+  ingress:
+    enabled: true
 
 grafana:
   enabled: false
