@@ -1,0 +1,10 @@
+## blue-green image
+## ref: hhttps://hub.docker.com/r/jakuboskera/blue-green
+## @param image.registry blue-green image registry
+## @param image.repository blue-green image repository
+## @param image.tag blue-green image tag (immutable tags are recommended)
+##
+image:
+  registry: docker.io
+  repository: jakuboskera/blue-green
+  tag: blue

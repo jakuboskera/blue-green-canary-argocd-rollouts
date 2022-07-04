@@ -1,0 +1,7 @@
+################################################################################
+# Configuration file for markdownlint.
+#
+# https://github.com/markdownlint/markdownlint/blob/master/docs/configuration.md
+#
+################################################################################
+style '.mdl_style.rb'

@@ -1,0 +1,9 @@
+apiVersion: v2
+type: application
+name: canary
+version: 0.1.0
+description: Basic application using canary deployment method with analysis template
+dependencies:
+- name: common
+  version: 1.x.x
+  repository: https://charts.bitnami.com/bitnami

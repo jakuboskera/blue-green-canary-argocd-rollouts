@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: {{ template "common.names.fullname" . }}-success-rate
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  args:
+  - name: service-name
+  metrics:
+  - name: success-rate
+    interval: 30s
+    count: 3
+    successCondition: result[0] >= 0.95
+    failureLimit: 1
+    provider:
+      prometheus:
+        address: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090"
+        query: |-
+          {{ `sum(irate(
+            flask_http_request_total{service="{{args.service-name}}", status!~"4.*"}[30s]
+            )) /
+          sum(irate(
+          flask_http_request_total{service="{{args.service-name}}"}[30s]
+          ))
+          ` }}

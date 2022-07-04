@@ -1,0 +1,9 @@
+apiVersion: v2
+type: application
+name: blue-green
+version: 0.1.0
+description: Basic application using blue-green deployment method
+dependencies:
+- name: common
+  version: 1.x.x
+  repository: https://charts.bitnami.com/bitnami

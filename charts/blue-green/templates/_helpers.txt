@@ -1,0 +1,8 @@
+{{/* vim: set filetype=mustache: */}}
+
+{{/*
+Return the proper blue-green image name
+*/}}
+{{- define "blue-green.image" -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.image) }}
+{{- end -}}

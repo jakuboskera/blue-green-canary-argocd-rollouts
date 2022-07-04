@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ingress-nginx
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.repoURL }}
+    path: charts/ingress-nginx
+    targetRevision: HEAD
+    helm:
+      values: |
+        ingress-nginx:
+          controller:
+            service:
+              type: NodePort
+              nodePorts:
+                http: 32080
+                https: 32443
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: ingress-nginx
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

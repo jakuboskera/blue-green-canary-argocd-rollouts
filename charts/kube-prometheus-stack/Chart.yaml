@@ -1,0 +1,12 @@
+apiVersion: v2
+type: application
+name: kube-prometheus-stack
+version: 0.1.0
+description: kube-prometheus-stack collects Kubernetes manifests, Grafana dashboards, and Prometheus rules combined with documentation and scripts to provide easy to operate end-to-end Kubernetes cluster monitoring with Prometheus using the Prometheus Operator
+dependencies:
+- name: common
+  version: 1.x.x
+  repository: https://charts.bitnami.com/bitnami
+- name: kube-prometheus-stack
+  version: 36.2.1
+  repository: https://prometheus-community.github.io/helm-charts

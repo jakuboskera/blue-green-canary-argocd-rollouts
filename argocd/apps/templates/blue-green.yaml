@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: blue-green
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.repoURL }}
+    path: charts/blue-green
+    targetRevision: HEAD
+    helm:
+      parameters:
+      - name: image.tag
+        # change value to green or blue
+        value: blue
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: blue-green
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

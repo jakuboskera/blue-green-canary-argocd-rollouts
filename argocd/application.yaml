@@ -1,0 +1,25 @@
+server:
+  additionalApplications:
+    - name: app-of-apps
+      namespace: argocd
+      project: default
+      source:
+        # change this URL to URL of your forked repository
+        repoURL: https://github.com/jakuboskera/blue-green-canary-argocd-rollouts.git
+        targetRevision: HEAD
+        path: argocd/apps
+      destination:
+        server: 'https://kubernetes.default.svc'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+controller:
+  args:
+    appResyncPeriod: 10
+dex:
+  enabled: false
+applicationSet:
+  enabled: false
+notifications:
+  enabled: false
