@@ -1,4 +1,4 @@
-# Canary and blue-green deployment strategy using Argo Rollouts
+# Blue-green and canary deployment strategy using ArgoCD and Argo Rollouts
 
 This repository shows
 [Argo Rollouts](https://argoproj.github.io/argo-rollouts/) in action.
@@ -49,7 +49,7 @@ Creation and management of a Kubernetes cluster on
 1. Clone your forked repo
 
     ```bash
-    git clone <url-of-your-forked-github-repository>
+    git clone https://github.com/<gh_username>/blue-green-canary-argocd-rollouts.git
     ```
 
 1. Navigate to a folder `blue-green-canary-argocd-rollouts`
@@ -61,7 +61,7 @@ Creation and management of a Kubernetes cluster on
 1. Replace value of `repoURL` of ArgoCD applications to your GitHub repository
 
     ```bash
-    make replace-repourl URL=<url-of-your-forked-github-repository>
+    make replace-repourl URL=https://github.com/<gh_username>/blue-green-canary-argocd-rollouts.git
     ```
 
 1. Commit and push these changes
