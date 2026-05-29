@@ -101,8 +101,7 @@ jobs:
             --namespace argo-rollouts \
             --create-namespace \
             --wait \
-            --timeout 5m \
-            --set argo-rollouts.controller.replicas=1
+            --timeout 5m
 
       - name: Install ServiceMonitor CRD (prometheus-operator)
         run: |
