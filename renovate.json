@@ -4,18 +4,6 @@
     "config:recommended"
   ],
   "labels": ["renovate", "dependencies"],
-  "packageRules": [
-    {
-      "description": "Auto-merge minor and patch Helm chart dependency updates",
-      "matchManagers": ["helmv2"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true
-    },
-    {
-      "description": "Auto-merge minor and patch Terraform provider updates",
-      "matchManagers": ["terraform"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true
-    }
-  ]
+  "automerge": true,
+  "platformAutomerge": true
 }
