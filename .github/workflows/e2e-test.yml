@@ -2,7 +2,7 @@ name: E2E Test & Auto-merge
 
 on:
   pull_request:
-    branches: [master]
+    branches: [main]
 
 permissions:
   contents: write
