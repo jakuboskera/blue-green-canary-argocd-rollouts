@@ -8,5 +8,5 @@ dependencies:
   version: 1.x.x
   repository: https://charts.bitnami.com/bitnami
 - name: argo-rollouts
-  version: 2.17.0
+  version: 2.40.10
   repository: https://argoproj.github.io/argo-helm
