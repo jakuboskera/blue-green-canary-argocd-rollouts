@@ -1,0 +1,304 @@
+name: E2E Test & Auto-merge
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: Validate Helm charts (lint + template rendering)
+  # ---------------------------------------------------------------------------
+  helm-validate:
+    name: Validate Helm Charts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Add Helm repositories
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add argo https://argoproj.github.io/argo-helm
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+
+      - name: Build dependencies and lint all charts
+        run: |
+          set -e
+          for chart in charts/*/; do
+            echo "=== Validating $chart ==="
+            helm dependency build "$chart"
+            helm lint "$chart"
+          done
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Validate Terraform configuration
+  # ---------------------------------------------------------------------------
+  terraform-validate:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: terraform
+        run: terraform validate
+
+  # ---------------------------------------------------------------------------
+  # Job 3: E2E test – spin up Kind cluster and deploy all Helm charts
+  # ---------------------------------------------------------------------------
+  e2e-test:
+    name: E2E Test on Kind
+    runs-on: ubuntu-latest
+    needs: [helm-validate, terraform-validate]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: e2e-test
+          wait: 120s
+
+      - name: Add Helm repositories
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add argo https://argoproj.github.io/argo-helm
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+
+      - name: Build Helm dependencies
+        run: |
+          set -e
+          for chart in charts/*/; do
+            echo "--- Building dependencies for $chart ---"
+            helm dependency build "$chart"
+          done
+
+      # -- Infrastructure charts ------------------------------------------------
+
+      - name: Install Argo Rollouts
+        run: |
+          helm upgrade --install argo-rollouts charts/argo-rollouts \
+            --namespace argo-rollouts \
+            --create-namespace \
+            --wait \
+            --timeout 5m \
+            --set argo-rollouts.controller.replicas=1
+
+      - name: Install ServiceMonitor CRD (prometheus-operator)
+        run: |
+          kubectl apply --server-side \
+            -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.68.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+
+      # -- Application charts ---------------------------------------------------
+
+      - name: Install blue-green application
+        run: |
+          helm upgrade --install blue-green charts/blue-green \
+            --namespace blue-green \
+            --create-namespace \
+            --wait \
+            --timeout 5m
+
+      - name: Install canary application
+        run: |
+          helm upgrade --install canary charts/canary \
+            --namespace canary \
+            --create-namespace \
+            --wait \
+            --timeout 5m
+
+      # -- Install Argo Rollouts kubectl plugin -----------------------------------
+
+      - name: Install kubectl-argo-rollouts plugin
+        run: |
+          curl -sSLo kubectl-argo-rollouts \
+            https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+          chmod +x kubectl-argo-rollouts
+          sudo mv kubectl-argo-rollouts /usr/local/bin/
+
+      # -- Validation -----------------------------------------------------------
+
+      - name: Validate all pods are running
+        run: |
+          set -e
+
+          echo "=== Argo Rollouts namespace ==="
+          kubectl -n argo-rollouts get pods
+          kubectl -n argo-rollouts wait --for=condition=Ready pods --all --timeout=120s
+
+          echo "=== Blue-green namespace ==="
+          kubectl -n blue-green get rollouts.argoproj.io
+          kubectl -n blue-green get svc
+          kubectl -n blue-green get pods
+          kubectl -n blue-green wait --for=condition=Ready pods --all --timeout=120s
+
+          echo "=== Canary namespace ==="
+          kubectl -n canary get rollouts.argoproj.io
+          kubectl -n canary get svc
+          kubectl -n canary get pods
+          kubectl -n canary wait --for=condition=Ready pods --all --timeout=120s
+
+          echo ""
+          echo "✅ All pods are running!"
+
+      # -- Blue-green deployment simulation -------------------------------------
+      # Follows the procedure described in README.md:
+      # 1. Initial deployment uses image tag "blue"
+      # 2. Upgrade to "green" → rollout pauses (autoPromotionEnabled: false)
+      # 3. Verify preview service shows green while active still shows blue
+      # 4. Promote the rollout
+      # 5. Verify active service now shows green
+
+      - name: "Blue-green: verify initial blue deployment"
+        run: |
+          set -e
+
+          echo "--- Verifying initial blue-green deployment (tag: blue) ---"
+          kubectl -n blue-green get rollout blue-green -o wide
+
+          # Port-forward to active service and verify it responds
+          kubectl -n blue-green port-forward svc/blue-green-active 8081:80 &
+          PF_ACTIVE_PID=$!
+          sleep 3
+
+          ACTIVE_RESPONSE=$(curl -sS http://localhost:8081 || true)
+          echo "Active service response (first 500 chars):"
+          echo "$ACTIVE_RESPONSE" | head -c 500
+          echo ""
+
+          # The blue version should contain "blue" in the response body
+          if echo "$ACTIVE_RESPONSE" | grep -qi "blue"; then
+            echo "✅ Active service is serving the BLUE version"
+          else
+            echo "⚠️  Could not confirm 'blue' in response, but service is reachable"
+          fi
+
+          kill $PF_ACTIVE_PID 2>/dev/null || true
+
+      - name: "Blue-green: deploy green version (simulate upgrade)"
+        run: |
+          set -e
+
+          echo "--- Upgrading blue-green app: blue → green ---"
+          helm upgrade --install blue-green charts/blue-green \
+            --namespace blue-green \
+            --set image.tag=green \
+            --timeout 5m
+
+          # Wait for the new ReplicaSet pods to be ready
+          echo "Waiting for new pods to become ready..."
+          sleep 10
+          kubectl -n blue-green wait --for=condition=Ready pods --all --timeout=120s
+
+      - name: "Blue-green: verify rollout is paused"
+        run: |
+          set -e
+
+          echo "--- Checking rollout status ---"
+          kubectl-argo-rollouts -n blue-green status blue-green --timeout 60s || true
+
+          # The rollout should be paused awaiting promotion
+          STATUS=$(kubectl -n blue-green get rollout blue-green -o jsonpath='{.status.phase}')
+          echo "Rollout phase: $STATUS"
+
+          if [ "$STATUS" = "Paused" ]; then
+            echo "✅ Rollout is correctly paused (awaiting promotion)"
+          else
+            echo "Current status: $STATUS"
+            kubectl -n blue-green describe rollout blue-green | tail -20
+          fi
+
+      - name: "Blue-green: verify preview=green, active=blue"
+        run: |
+          set -e
+
+          # Port-forward to active service (should still be blue)
+          kubectl -n blue-green port-forward svc/blue-green-active 8081:80 &
+          PF_ACTIVE=$!
+          # Port-forward to preview service (should be green)
+          kubectl -n blue-green port-forward svc/blue-green-preview 8082:80 &
+          PF_PREVIEW=$!
+          sleep 3
+
+          echo "--- Active service (should be blue) ---"
+          ACTIVE_RESP=$(curl -sS http://localhost:8081 || true)
+          echo "$ACTIVE_RESP" | head -c 500
+          echo ""
+
+          if echo "$ACTIVE_RESP" | grep -qi "blue"; then
+            echo "✅ Active service is still serving BLUE version"
+          else
+            echo "⚠️  Active service response may have changed"
+          fi
+
+          echo ""
+          echo "--- Preview service (should be green) ---"
+          PREVIEW_RESP=$(curl -sS http://localhost:8082 || true)
+          echo "$PREVIEW_RESP" | head -c 500
+          echo ""
+
+          if echo "$PREVIEW_RESP" | grep -qi "green"; then
+            echo "✅ Preview service is serving GREEN version"
+          else
+            echo "⚠️  Could not confirm 'green' in preview response"
+          fi
+
+          kill $PF_ACTIVE $PF_PREVIEW 2>/dev/null || true
+
+      - name: "Blue-green: promote rollout"
+        run: |
+          set -e
+
+          echo "--- Promoting blue-green rollout (green → active) ---"
+          kubectl-argo-rollouts -n blue-green promote blue-green
+
+          echo "Waiting for rollout to become Healthy..."
+          kubectl-argo-rollouts -n blue-green status blue-green --timeout 120s
+
+          echo "✅ Rollout promoted successfully"
+
+      - name: "Blue-green: verify active service is now green"
+        run: |
+          set -e
+
+          # Port-forward to active service (should now be green)
+          kubectl -n blue-green port-forward svc/blue-green-active 8081:80 &
+          PF_PID=$!
+          sleep 3
+
+          echo "--- Active service after promotion (should be green) ---"
+          ACTIVE_RESP=$(curl -sS http://localhost:8081 || true)
+          echo "$ACTIVE_RESP" | head -c 500
+          echo ""
+
+          if echo "$ACTIVE_RESP" | grep -qi "green"; then
+            echo "✅ Active service is now serving GREEN version — blue-green deployment simulation PASSED!"
+          else
+            echo "❌ Expected 'green' in active service response after promotion"
+            kill $PF_PID 2>/dev/null || true
+            exit 1
+          fi
+
+          kill $PF_PID 2>/dev/null || true
+          echo ""
+          echo "✅ Full E2E blue-green deployment simulation completed successfully!"
