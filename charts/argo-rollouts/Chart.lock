@@ -1,9 +1,9 @@
 dependencies:
 - name: common
   repository: https://charts.bitnami.com/bitnami
-  version: 1.16.0
+  version: 2.41.0
 - name: argo-rollouts
   repository: https://argoproj.github.io/argo-helm
   version: 2.17.0
-digest: sha256:4c7155cc7c3e9a98040e7d7d220b0ad0e2cbff48b2a041e9db69d159a0f75540
-generated: "2022-07-04T17:09:16.724173+02:00"
+digest: sha256:79dac8c080e231fd58376ca97c8ddea51b24a2196e63572a4ff9655afdd7d1c5
+generated: "2026-08-29T08:08:06.469734948Z"
