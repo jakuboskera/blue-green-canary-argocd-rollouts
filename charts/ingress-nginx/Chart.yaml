@@ -5,7 +5,7 @@ version: 0.1.0
 description: Kubernetes ingress controller from community
 dependencies:
 - name: common
-  version: 1.x.x
+  version: 2.x
   repository: https://charts.bitnami.com/bitnami
 - name: ingress-nginx
   version: 4.1.4
